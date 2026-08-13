@@ -21,6 +21,47 @@ public class ResultsController : ControllerBase
     public async Task<ActionResult<List<ProcessingResult>>> Get(
         [FromQuery] ResultFilterDto filter)
     {
+        if (filter.StartDateFrom.HasValue &&
+            filter.StartDateTo.HasValue &&
+            filter.StartDateFrom > filter.StartDateTo)
+        {
+            return BadRequest(new
+            {
+                error = "Начальная дата диапазона не может быть позже конечной."
+            });
+        }
+
+        if (filter.AverageValueFrom.HasValue &&
+            filter.AverageValueTo.HasValue &&
+            filter.AverageValueFrom > filter.AverageValueTo)
+        {
+            return BadRequest(new
+            {
+                error = "Минимальное среднее значение не может быть больше максимального."
+            });
+        }
+
+        if (filter.AverageExecutionTimeFrom.HasValue &&
+            filter.AverageExecutionTimeTo.HasValue &&
+            filter.AverageExecutionTimeFrom > filter.AverageExecutionTimeTo)
+        {
+            return BadRequest(new
+            {
+                error = "Минимальное среднее время выполнения не может быть больше максимального."
+            });
+        }
+
+        if (filter.AverageValueFrom < 0 ||
+            filter.AverageValueTo < 0 ||
+            filter.AverageExecutionTimeFrom < 0 ||
+            filter.AverageExecutionTimeTo < 0)
+        {
+            return BadRequest(new
+            {
+                error = "Числовые значения фильтров не могут быть отрицательными."
+            });
+        }
+
         var query = _db.Results
             .AsNoTracking()
             .AsQueryable();

@@ -1,6 +1,8 @@
+using TimescaleApi.Entities;
+
 namespace TimescaleApi.Services;
 
 public interface ICsvProcessingService
 {
-    Task ProcessAsync(IFormFile file);
+    Task<ProcessingResult> ProcessAsync(IFormFile file);
 }

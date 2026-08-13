@@ -1,4 +1,6 @@
 using System.Globalization;
+using Microsoft.EntityFrameworkCore;
+using TimescaleApi.Data;
 using TimescaleApi.Entities;
 using TimescaleApi.Exceptions;
 
@@ -11,8 +13,32 @@ public class CsvProcessingService : ICsvProcessingService
     private static readonly DateTimeOffset MinAllowedDate =
         new(2000, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
-    public async Task ProcessAsync(IFormFile file)
+    private readonly AppDbContext _db;
+
+    public CsvProcessingService(AppDbContext db)
     {
+        _db = db;
+    }
+
+    public async Task<ProcessingResult> ProcessAsync(IFormFile file)
+    {
+        var fileName = Path.GetFileName(file.FileName);
+
+        if (!string.Equals(
+                Path.GetExtension(fileName),
+                ".csv",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            throw new CsvValidationException(
+                "Допускаются только CSV-файлы.");
+        }
+
+        if (fileName.Length > 255)
+        {
+            throw new CsvValidationException(
+                "Имя файла слишком длинное.");
+        }
+
         using var reader = new StreamReader(file.OpenReadStream());
 
         var header = await reader.ReadLineAsync();
@@ -33,7 +59,6 @@ public class CsvProcessingService : ICsvProcessingService
         string? line;
         var lineNumber = 1;
 
-        // Фиксируем текущее время один раз для всего файла
         var now = DateTimeOffset.UtcNow;
 
         while ((line = await reader.ReadLineAsync()) is not null)
@@ -126,7 +151,7 @@ public class CsvProcessingService : ICsvProcessingService
 
             values.Add(new MeasurementValue
             {
-                FileName = file.FileName,
+                FileName = fileName,
                 Date = date,
                 ExecutionTime = executionTime,
                 Value = value
@@ -138,5 +163,80 @@ public class CsvProcessingService : ICsvProcessingService
             throw new CsvValidationException(
                 "CSV должен содержать минимум одну запись.");
         }
+
+        var minDate = values.Min(x => x.Date);
+        var maxDate = values.Max(x => x.Date);
+
+        var result = new ProcessingResult
+        {
+            FileName = fileName,
+
+            TimeDeltaSeconds =
+                (maxDate - minDate).TotalSeconds,
+
+            FirstOperationDate =
+                minDate,
+
+            AverageExecutionTime =
+                values.Average(x => x.ExecutionTime),
+
+            AverageValue =
+                values.Average(x => x.Value),
+
+            MedianValue =
+                CalculateMedian(values.Select(x => x.Value)),
+
+            MaxValue =
+                values.Max(x => x.Value),
+
+            MinValue =
+                values.Min(x => x.Value)
+        };
+
+        await using var transaction =
+            await _db.Database.BeginTransactionAsync();
+
+        try
+        {
+            await _db.Values
+                .Where(x => x.FileName == fileName)
+                .ExecuteDeleteAsync();
+
+            await _db.Results
+                .Where(x => x.FileName == fileName)
+                .ExecuteDeleteAsync();
+
+            await _db.Values.AddRangeAsync(values);
+
+            await _db.Results.AddAsync(result);
+
+            await _db.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+
+            throw;
+        }
+
+        return result;
+    }
+
+    private static double CalculateMedian(IEnumerable<double> source)
+    {
+        var numbers = source
+            .OrderBy(x => x)
+            .ToArray();
+
+        var middle = numbers.Length / 2;
+
+        if (numbers.Length % 2 == 0)
+        {
+            return (numbers[middle - 1] + numbers[middle]) / 2.0;
+        }
+
+        return numbers[middle];
     }
 }

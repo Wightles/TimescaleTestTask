@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using TimescaleApi.Services;
 using TimescaleApi.Exceptions;
+using TimescaleApi.Services;
 
 namespace TimescaleApi.Controllers;
 
@@ -16,30 +16,34 @@ public class FilesController : ControllerBase
     }
 
     [HttpPost("upload")]
-[Consumes("multipart/form-data")]
-public async Task<IActionResult> Upload(IFormFile file)
-{
-    if (file.Length == 0)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> Upload(IFormFile file)
     {
-        return BadRequest("Файл пуст.");
-    }
-
-    try
-    {
-        await _csvProcessingService.ProcessAsync(file);
-    }
-    catch (CsvValidationException exception)
-    {
-        return BadRequest(new
+        if (file.Length == 0)
         {
-            error = exception.Message
-        });
-    }
+            return BadRequest(new
+            {
+                error = "Файл пуст."
+            });
+        }
 
-    return Ok(new
-    {
-        message = "CSV успешно прошёл валидацию.",
-        fileName = file.FileName
-    });
-}
+        try
+        {
+            var result =
+                await _csvProcessingService.ProcessAsync(file);
+
+            return Ok(new
+            {
+                message = "CSV успешно обработан.",
+                result
+            });
+        }
+        catch (CsvValidationException exception)
+        {
+            return BadRequest(new
+            {
+                error = exception.Message
+            });
+        }
+    }
 }

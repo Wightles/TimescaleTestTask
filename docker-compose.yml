@@ -5,8 +5,6 @@ services:
       POSTGRES_DB: timescale_api
       POSTGRES_USER: timescale_user
       POSTGRES_PASSWORD: timescale_password
-    ports:
-      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -26,7 +24,7 @@ services:
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=timescale_api;Username=timescale_user;Password=timescale_password
       Database__ApplyMigrationsOnStartup: "true"
     ports:
-      - "8080:8080"
+      - "53412:8080"
     depends_on:
       postgres:
         condition: service_healthy

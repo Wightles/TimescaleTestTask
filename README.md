@@ -21,13 +21,13 @@ docker compose up --build
 API будет доступен на:
 
 ```text
-http://localhost:8080
+http://localhost:53412
 ```
 
 Swagger:
 
 ```text
-http://localhost:8080/swagger
+http://localhost:53412/swagger
 ```
 
 PostgreSQL поднимается в Docker Compose. Миграции применяются при старте приложения.
@@ -76,8 +76,8 @@ CSV должен иметь формат:
 
 ```csv
 Date;ExecutionTime;Value
-2024-01-01T00:00:00Z;10;100
-2024-01-01T00:01:30Z;20;200
+2026-01-01T00:00:00Z;10;100
+2026-01-01T00:01:30Z;20;200
 ```
 
 Основные правила:

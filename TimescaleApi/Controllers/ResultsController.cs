@@ -19,7 +19,8 @@ public class ResultsController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<List<ProcessingResult>>> Get(
-        [FromQuery] ResultFilterDto filter)
+        [FromQuery] ResultFilterDto filter,
+        CancellationToken cancellationToken)
     {
         if (filter.StartDateFrom.HasValue &&
             filter.StartDateTo.HasValue &&
@@ -112,7 +113,7 @@ public class ResultsController : ControllerBase
 
         var results = await query
             .OrderBy(x => x.FileName)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return Ok(results);
     }

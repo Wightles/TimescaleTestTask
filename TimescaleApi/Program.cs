@@ -30,7 +30,8 @@ if (builder.Configuration.GetValue<bool>(
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    await db.Database.MigrateAsync();
+    await db.Database.MigrateAsync(
+        app.Lifetime.ApplicationStopping);
 }
 
 app.UseExceptionHandler();

@@ -18,7 +18,8 @@ public class ValuesController : ControllerBase
 
     [HttpGet("latest")]
     public async Task<ActionResult<List<MeasurementValue>>> GetLatest(
-        [FromQuery] string fileName)
+        [FromQuery] string fileName,
+        CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
@@ -33,7 +34,7 @@ public class ValuesController : ControllerBase
             .Where(x => x.FileName == fileName)
             .OrderByDescending(x => x.Date)
             .Take(10)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return Ok(values);
     }

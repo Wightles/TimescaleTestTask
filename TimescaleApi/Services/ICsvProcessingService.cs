@@ -4,5 +4,7 @@ namespace TimescaleApi.Services;
 
 public interface ICsvProcessingService
 {
-    Task<ProcessingResult> ProcessAsync(IFormFile file);
+    Task<ProcessingResult> ProcessAsync(
+        IFormFile file,
+        CancellationToken cancellationToken = default);
 }

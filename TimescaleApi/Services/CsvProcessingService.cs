@@ -20,7 +20,9 @@ public class CsvProcessingService : ICsvProcessingService
         _db = db;
     }
 
-    public async Task<ProcessingResult> ProcessAsync(IFormFile file)
+    public async Task<ProcessingResult> ProcessAsync(
+        IFormFile file,
+        CancellationToken cancellationToken = default)
     {
         var fileName = Path.GetFileName(file.FileName);
 
@@ -41,7 +43,7 @@ public class CsvProcessingService : ICsvProcessingService
 
         using var reader = new StreamReader(file.OpenReadStream());
 
-        var header = await reader.ReadLineAsync();
+        var header = await reader.ReadLineAsync(cancellationToken);
 
         if (header is null)
         {
@@ -61,7 +63,8 @@ public class CsvProcessingService : ICsvProcessingService
 
         var now = DateTimeOffset.UtcNow;
 
-        while ((line = await reader.ReadLineAsync()) is not null)
+        while ((line = await reader.ReadLineAsync(cancellationToken))
+               is not null)
         {
             lineNumber++;
 
@@ -194,25 +197,30 @@ public class CsvProcessingService : ICsvProcessingService
         };
 
         await using var transaction =
-            await _db.Database.BeginTransactionAsync();
+            await _db.Database.BeginTransactionAsync(
+                cancellationToken);
 
         try
         {
             await _db.Values
                 .Where(x => x.FileName == fileName)
-                .ExecuteDeleteAsync();
+                .ExecuteDeleteAsync(cancellationToken);
 
             await _db.Results
                 .Where(x => x.FileName == fileName)
-                .ExecuteDeleteAsync();
+                .ExecuteDeleteAsync(cancellationToken);
 
-            await _db.Values.AddRangeAsync(values);
+            await _db.Values.AddRangeAsync(
+                values,
+                cancellationToken);
 
-            await _db.Results.AddAsync(result);
+            await _db.Results.AddAsync(
+                result,
+                cancellationToken);
 
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(cancellationToken);
 
-            await transaction.CommitAsync();
+            await transaction.CommitAsync(cancellationToken);
         }
         catch
         {

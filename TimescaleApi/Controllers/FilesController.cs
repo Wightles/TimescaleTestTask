@@ -17,7 +17,9 @@ public class FilesController : ControllerBase
 
     [HttpPost("upload")]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> Upload(IFormFile? file)
+    public async Task<IActionResult> Upload(
+        IFormFile? file,
+        CancellationToken cancellationToken)
     {
         if (file is null || file.Length == 0)
         {
@@ -30,7 +32,9 @@ public class FilesController : ControllerBase
         try
         {
             var result =
-                await _csvProcessingService.ProcessAsync(file);
+                await _csvProcessingService.ProcessAsync(
+                    file,
+                    cancellationToken);
 
             return Ok(new
             {

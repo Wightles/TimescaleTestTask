@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TimescaleApi.Data;
+using TimescaleApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<ICsvProcessingService, CsvProcessingService>();
 
 var app = builder.Build();
 

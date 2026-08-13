@@ -17,9 +17,9 @@ public class FilesController : ControllerBase
 
     [HttpPost("upload")]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> Upload(IFormFile file)
+    public async Task<IActionResult> Upload(IFormFile? file)
     {
-        if (file.Length == 0)
+        if (file is null || file.Length == 0)
         {
             return BadRequest(new
             {

@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimescaleApi", "TimescaleApi\TimescaleApi.csproj", "{F078A8EB-DC19-42F4-8797-DDE299D38A71}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimescaleApi.Tests", "TimescaleApi.Tests\TimescaleApi.Tests.csproj", "{D9B9F267-DA33-488B-A053-AAED1FF087AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{F078A8EB-DC19-42F4-8797-DDE299D38A71}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F078A8EB-DC19-42F4-8797-DDE299D38A71}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F078A8EB-DC19-42F4-8797-DDE299D38A71}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9B9F267-DA33-488B-A053-AAED1FF087AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9B9F267-DA33-488B-A053-AAED1FF087AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9B9F267-DA33-488B-A053-AAED1FF087AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9B9F267-DA33-488B-A053-AAED1FF087AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
